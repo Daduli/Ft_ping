@@ -7,6 +7,7 @@ Code 1: unrecognized single dashed flag
 Code 2: unrecognized double dashed flag
 Code 3: no host
 Code 4: more than one host
+Code 5: Host not found
 */
 void print_error_message(int error_code, char *argument)
 {
@@ -30,6 +31,9 @@ void print_error_message(int error_code, char *argument)
 		printf("ft_ping: only one host is needed\n");
 		exit(4);
 		break;
+	case 5:
+		printf("ft_ping: unknown host\n");
+		exit(5);
 
 	default:
 		break;
