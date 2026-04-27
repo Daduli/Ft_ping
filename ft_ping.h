@@ -29,4 +29,5 @@ void ft_parser(int ac, char **av, char **hostname, t_flags *flags);
 /*=========    HELPERS    ========*/
 /*================================*/
 
-void print_error(char *message);
+void print_error_message(int error_code, char *argument);
+void display_help();

@@ -14,9 +14,7 @@ char get_argument_type(char *argument)
 			return ('S');
 	}
 	else
-	{
 		return ('H');
-	}
 }
 
 /****************************************************************************
@@ -25,7 +23,6 @@ char get_argument_type(char *argument)
  * -v	verbose output                                                      *
  * -?	help list                                                           *
  ****************************************************************************/
-
 void get_single_dash_flag(char *argument, t_flags *flags)
 {
 	// i = 1 to skip the '-' at the beginning of the string
@@ -40,8 +37,7 @@ void get_single_dash_flag(char *argument, t_flags *flags)
 			flags->help = true;
 			break;
 		default:
-			printf("ft_ping: invalid option -- '%c'\nTry 'ping -?' for more information.\n", argument[i]);
-			exit(1);
+			print_error_message(1, argument + i);
 			break;
 		}
 	}
@@ -60,9 +56,7 @@ void get_double_dash_flag(char *argument, t_flags *flags)
 	else if (!strcmp(argument, "help"))
 		flags->help = true;
 	else
-	{
-		printf("ft_ping: unrecognized option '--%s'\nTry './ft_ping -?' for more information.\n", argument);
-	}
+		print_error_message(2, argument);
 }
 
 void ft_parser(int ac, char **av, char **hostname, t_flags *flags)
@@ -71,7 +65,6 @@ void ft_parser(int ac, char **av, char **hostname, t_flags *flags)
 
 	for (int i = 1; i < ac; i++)
 	{
-		printf("av: %s\n", av[i]);
 		char type = get_argument_type(av[i]);
 		if (type == 'H')
 		{
@@ -84,10 +77,10 @@ void ft_parser(int ac, char **av, char **hostname, t_flags *flags)
 			get_double_dash_flag(av[i] + 2, flags);
 	}
 
-	printf("Verbose: %d, Help: %d\n", flags->verbose, flags->help);
-
-	if (host_count != 1)
-	{
-		print_error("ft_ping: missing host operand\nTry './ft_ping -?' for more information.");
-	}
+	if (flags->help)
+		display_help();
+	else if (host_count < 1)
+		print_error_message(3, NULL);
+	else if (host_count > 1)
+		print_error_message(4, NULL);
 }
