@@ -26,7 +26,7 @@ typedef struct s_flags
 void ft_parser(int ac, char **av, char **hostname, t_flags *flags);
 
 /*================================*/
-/*==========    PARSE    =========*/
+/*==========    SOCKET    ========*/
 /*================================*/
 
 void ft_socket(char *hostname);

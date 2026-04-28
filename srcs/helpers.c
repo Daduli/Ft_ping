@@ -7,7 +7,8 @@ Code 1: unrecognized single dashed flag
 Code 2: unrecognized double dashed flag
 Code 3: no host
 Code 4: more than one host
-Code 5: Host not found
+Code 5: host not found
+Code 6: failed to create raw socket
 */
 void print_error_message(int error_code, char *argument)
 {
@@ -34,6 +35,11 @@ void print_error_message(int error_code, char *argument)
 	case 5:
 		printf("ft_ping: unknown host\n");
 		exit(5);
+		break;
+	case 6:
+		printf("ft_ping: failed to create raw socket\n");
+		exit(6);
+		break;
 
 	default:
 		break;

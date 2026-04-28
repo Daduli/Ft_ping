@@ -6,6 +6,5 @@ int main(int ac, char **av)
 	t_flags flags = {};
 
 	ft_parser(ac, av, &hostname, &flags);
-	printf("Hostname: %s\n", hostname);
 	ft_socket(hostname);
 }
