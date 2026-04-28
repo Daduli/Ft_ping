@@ -14,6 +14,7 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include <unistd.h>
+#include <signal.h>
 
 /*================================*/
 /*=====    DATA STRUCTURE    =====*/
@@ -36,6 +37,12 @@ void ft_parser(int ac, char **av, char **hostname, t_flags *flags);
 /*================================*/
 
 void ft_socket(char *hostname);
+
+/*================================*/
+/*==========    SIGNAL    ========*/
+/*================================*/
+
+void ft_signal();
 
 /*================================*/
 /*=========    HELPERS    ========*/

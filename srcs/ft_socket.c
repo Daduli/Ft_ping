@@ -13,6 +13,7 @@ void get_ip_address(char *hostname)
     if (getaddrinfo(hostname, NULL, &hints, &result))
         print_error_message(5, NULL);
 
+    // Clear the memory space that was allocated for the IP linked list
     freeaddrinfo(result);
 
     // struct sockaddr_in ip_addr = *(struct sockaddr_in *)result->ai_addr;
@@ -30,6 +31,7 @@ void ft_socket(char *hostname)
     int ttl;
     if (sockfd < 0)
         print_error_message(6, NULL);
+    // Set the Time-to-live for the socket to be sent
     if (setsockopt(sockfd, IPPROTO_ICMP, IP_TTL, &ttl, 64) == -1)
     {
         close(sockfd);

@@ -7,4 +7,10 @@ int main(int ac, char **av)
 
 	ft_parser(ac, av, &hostname, &flags);
 	ft_socket(hostname);
+	ft_signal();
+
+	while (1)
+	{
+		continue;
+	}
 }
