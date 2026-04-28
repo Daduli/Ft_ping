@@ -8,7 +8,7 @@ Code 2: unrecognized double dashed flag
 Code 3: no host
 Code 4: more than one host
 Code 5: host not found
-Code 6: failed to create raw socket
+Code 6: error during socket creation
 */
 void print_error_message(int error_code, char *argument)
 {
@@ -37,7 +37,7 @@ void print_error_message(int error_code, char *argument)
 		exit(5);
 		break;
 	case 6:
-		printf("ft_ping: failed to create raw socket\n");
+		printf("ft_ping: %s\n", strerror(errno));
 		exit(6);
 		break;
 

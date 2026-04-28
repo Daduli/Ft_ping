@@ -1,10 +1,4 @@
 #include "../ft_ping.h"
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <arpa/inet.h>
-
-#include <errno.h>
 
 void get_ip_address(char *hostname)
 {
@@ -33,6 +27,12 @@ void ft_socket(char *hostname)
 
     // Create a raw socket to send data
     int sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
+    int ttl;
     if (sockfd < 0)
         print_error_message(6, NULL);
+    if (setsockopt(sockfd, IPPROTO_ICMP, IP_TTL, &ttl, 64) == -1)
+    {
+        close(sockfd);
+        print_error_message(6, NULL);
+    }
 }
