@@ -26,17 +26,24 @@ typedef struct s_flags
 	bool help;
 } t_flags;
 
+typedef struct s_host
+{
+	char *name;
+	char ip[INET_ADDRSTRLEN];
+	int data_length;
+} t_host;
+
 /*================================*/
 /*==========    PARSE    =========*/
 /*================================*/
 
-void ft_parser(int ac, char **av, char **hostname, t_flags *flags);
+void ft_parser(int ac, char **av, t_host *host, t_flags *flags);
 
 /*================================*/
 /*==========    SOCKET    ========*/
 /*================================*/
 
-void ft_socket(char *hostname);
+void ft_socket(t_host *host);
 
 /*================================*/
 /*==========    SIGNAL    ========*/

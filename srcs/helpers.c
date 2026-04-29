@@ -46,8 +46,14 @@ void print_error_message(int error_code, char *argument)
 	}
 }
 
+/* Function used to print the message from the -? or --help flags */
 void display_help()
 {
 	printf("Usage: ./ft_ping [OPTIONS...] HOST ...\nSend ICMP ECHO_REQUEST packets to network hosts.\n\n Options:\n  -v, --verbose		verbose output\n  -?, --help		give this help list\n");
 	exit(0);
 }
+
+// void print_ping_start()
+// {
+// 	printf("PING %s (%s): %d data bytes\n", );
+// }
