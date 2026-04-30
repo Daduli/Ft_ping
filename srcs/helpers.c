@@ -53,7 +53,7 @@ void display_help()
 	exit(0);
 }
 
-// void print_ping_start()
-// {
-// 	printf("PING %s (%s): %d data bytes\n", );
-// }
+void print_ping_start(t_host_info *host, int data_size)
+{
+	printf("PING %s (%s): %d data bytes\n", host->name, host->ip, data_size);
+}

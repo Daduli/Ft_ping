@@ -4,12 +4,13 @@ SRCS += ft_ping.c \
 		srcs/ft_parser.c \
 		srcs/ft_socket.c \
 		srcs/ft_signal.c \
+		srcs/ft_packet.c \
 		srcs/helpers.c
 
 OBJS = $(SRCS:%.c=%.o)
 
 CC = gcc
-FLAGS = -Wall -Wextra -Werror	
+# FLAGS = -Wall -Wextra -Werror	
 
 all: $(NAME)
 

@@ -59,7 +59,7 @@ void get_double_dash_flag(char *argument, t_flags *flags)
 		print_error_message(2, argument);
 }
 
-void ft_parser(int ac, char **av, t_host *host, t_flags *flags)
+void ft_parser(int ac, char **av, t_host_info *host_info, t_flags *flags)
 {
 	int host_count = 0;
 
@@ -68,7 +68,7 @@ void ft_parser(int ac, char **av, t_host *host, t_flags *flags)
 		char type = get_argument_type(av[i]);
 		if (type == 'H')
 		{
-			host->name = av[i];
+			host_info->name = av[i];
 			host_count++;
 		}
 		else if (type == 'S')
