@@ -3,7 +3,7 @@
 /*
  * Calculate the checksum for the ICMP header (Environment is 32 bits)
  */
-unsigned short calculate_checksum(unsigned short *icmp, int bytes)
+unsigned short calculate_checksum(uint16_t *icmp, size_t bytes)
 {
     // Sum must start at 0
     int sum = 0;
@@ -27,34 +27,33 @@ unsigned short calculate_checksum(unsigned short *icmp, int bytes)
     return (~sum);
 }
 
-void ft_send_packet(int sockfd, int data_size, t_host_info *host_info)
+void ft_send_packet(int sockfd, t_host_info *host_info)
 {
-    struct icmphdr header;
+    t_ping_packet send_packet;
     int sequence_number = 0;
-    unsigned short icmp[sizeof(struct icmphdr) + data_size];
 
-    header.type = ICMP_ECHO;
-    header.un.echo.id = getpid();
-    header.un.echo.sequence = sequence_number++;
-    header.checksum = calculate_checksum(icmp, sizeof(icmp));
+    // Fill the ICMP header with the information needed for the echo request
+    send_packet.header.type = ICMP_ECHO;
+    send_packet.header.code = 0;
+    send_packet.header.un.echo.id = getpid();
+    send_packet.header.un.echo.sequence = sequence_number++;
+    send_packet.header.checksum = calculate_checksum((uint16_t *)&send_packet.header, sizeof(send_packet.header));
 
-    int tmp;
-    if ((tmp = sendto(sockfd, icmp, sizeof(icmp), 0, (struct sockaddr *)&host_info->socket_address, sizeof(host_info->socket_address))) == -1)
+    // Send the packet for an echo request
+    if (sendto(sockfd, &send_packet, sizeof(send_packet), 0, host_info->socket_address, host_info->socket_length) == -1)
         print_error_message(6, NULL);
-
-    printf("Sent: %d\n", tmp);
 }
 
-void ft_receive_packet(int sockfd)
+void ft_receive_packet(int sockfd, t_host_info *host_info)
 {
-    struct sockaddr_in r_addr;
-    struct icmphdr buffer;
-
-    // if (recvfrom(sockfd, &buffer, 255, 0, (struct sockaddr *)&r_addr, sizeof(r_addr)) == -1)
-    //     print_error_message(6, NULL);
+    t_ping_packet recv_packet;
+    int tmp;
 
     printf("Receiving...\n");
-    recv(sockfd, &buffer, 255, MSG_DONTWAIT);
+    if ((tmp = recvfrom(sockfd, &recv_packet, sizeof(recv_packet), 0, host_info->socket_address, &host_info->socket_length)) == -1)
+        print_error_message(6, NULL);
 
-    printf("Received: %d\n", buffer.type);
+    printf("Received from: %s\n", host_info->ip);
+
+    printf("Response type: %d \n", recv_packet.header.type);
 }

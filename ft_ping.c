@@ -2,7 +2,7 @@
 
 int main(int ac, char **av)
 {
-	// For IPv4, default ping packet is 56 bytes of data (28 bytes for header, exluded)
+	// For IPv4, default ping packet is 56 bytes of data (28 bytes for header, excluded)
 	int sockfd, data_size = 56;
 	t_host_info host_info = {};
 	t_flags flags = {};
@@ -18,9 +18,8 @@ int main(int ac, char **av)
 	// {
 	if (sending)
 	{
-		ft_send_packet(sockfd, data_size, &host_info);
-		usleep(2);
-		ft_receive_packet(sockfd);
+		ft_send_packet(sockfd, &host_info);
+		ft_receive_packet(sockfd, &host_info);
 	}
 	// }
 }

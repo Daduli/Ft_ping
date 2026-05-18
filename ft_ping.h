@@ -30,9 +30,15 @@ typedef struct s_flags
 typedef struct s_host_info
 {
 	char *name;
-	struct sockaddr_in socket_address;
+	struct sockaddr *socket_address;
+	socklen_t socket_length;
 	char ip[INET_ADDRSTRLEN];
 } t_host_info;
+
+typedef struct s_ping_packet
+{
+	struct icmphdr header;
+} t_ping_packet;
 
 /*================================*/
 /*==========    PARSE    =========*/
@@ -56,8 +62,8 @@ void ft_signal();
 /*==========    PACKET    ========*/
 /*================================*/
 
-void ft_send_packet(int sockfd, int data_size, t_host_info *host_info);
-void ft_receive_packet(int sockfd);
+void ft_send_packet(int sockfd, t_host_info *host_info);
+void ft_receive_packet(int sockfd, t_host_info *host_info);
 
 /*================================*/
 /*=========    HELPERS    ========*/
