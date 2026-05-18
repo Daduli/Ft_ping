@@ -1,6 +1,6 @@
 #include "../ft_ping.h"
 
-void get_ip_address(t_host_info *host_info)
+void get_ip_address(t_host_info *host_info, t_packet_info *packet_info)
 {
     struct addrinfo hints = {
                         .ai_family = AF_INET,
@@ -15,25 +15,24 @@ void get_ip_address(t_host_info *host_info)
     struct sockaddr_in *addr = (struct sockaddr_in *)result->ai_addr;
     inet_ntop(AF_INET, &addr->sin_addr, host_info->ip, INET_ADDRSTRLEN);
 
-    host_info->socket_address = result->ai_addr;
-    host_info->socket_length = result->ai_addrlen;
+    packet_info->socket_address = result->ai_addr;
+    packet_info->socket_length = result->ai_addrlen;
 
     // Clear the memory space that was allocated for the IP linked list
     freeaddrinfo(result);
 }
 
-int ft_socket(t_host_info *host_info)
+int ft_socket(t_host_info *host_info, t_packet_info *packet_info)
 {
     // Check if the given hostname exists
-    get_ip_address(host_info);
+    get_ip_address(host_info, packet_info);
 
     // Create a connectionless socket to send data
     int sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_ICMP);
-    int ttl = 64;
     if (sockfd < 0)
         print_error_message(6, NULL);
     // Set the Time-to-live for the socket to be sent
-    if (setsockopt(sockfd, IPPROTO_IP, IP_TTL, &ttl, sizeof(ttl)) == -1)
+    if (setsockopt(sockfd, IPPROTO_IP, IP_TTL, &packet_info->ttl, sizeof(packet_info->ttl)) == -1)
     {
         close(sockfd);
         print_error_message(6, NULL);

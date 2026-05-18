@@ -1,15 +1,15 @@
 #include "../ft_ping.h"
 
 /*
-Takes an error code and print the related message.
-
-Code 1: unrecognized single dashed flag
-Code 2: unrecognized double dashed flag
-Code 3: no host
-Code 4: more than one host
-Code 5: host not found
-Code 6: error during socket creation
-*/
+ * Takes an error code and print the related message.
+ *
+ * Code 1: unrecognized single dashed flag
+ * Code 2: unrecognized double dashed flag
+ * Code 3: no host
+ * Code 4: more than one host
+ * Code 5: host not found
+ * Code 6: error during socket creation
+ */
 void print_error_message(int error_code, char *argument)
 {
 	char *info_message = "Try './ft_ping --help' or './ft_ping -?' for more information.\n";
@@ -53,7 +53,13 @@ void display_help()
 	exit(0);
 }
 
-void print_ping_start(t_host_info *host, int data_size)
+/* Prints the first message at the start of the ping command */
+void print_ping_start(t_host_info *host)
 {
-	printf("PING %s (%s): %d data bytes\n", host->name, host->ip, data_size);
+	printf("PING %s (%s): 56 data bytes\n", host->name, host->ip);
+}
+
+void print_ping_loop(t_ping_packet recv_packet, char *host_ip, int ttl)
+{
+	printf("%zu bytes from %s: icmp_seq=%d ttl=%d time=%% ms\n", sizeof(recv_packet), host_ip, ntohs(recv_packet.header.un.echo.sequence), ttl);
 }

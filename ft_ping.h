@@ -30,10 +30,15 @@ typedef struct s_flags
 typedef struct s_host_info
 {
 	char *name;
-	struct sockaddr *socket_address;
-	socklen_t socket_length;
 	char ip[INET_ADDRSTRLEN];
 } t_host_info;
+
+typedef struct s_packet_info
+{
+	struct sockaddr *socket_address;
+	socklen_t socket_length;
+	int ttl;
+} t_packet_info;
 
 typedef struct s_ping_packet
 {
@@ -50,7 +55,7 @@ void ft_parser(int ac, char **av, t_host_info *host_info, t_flags *flags);
 /*==========    SOCKET    ========*/
 /*================================*/
 
-int ft_socket(t_host_info *host_info);
+int ft_socket(t_host_info *host_info, t_packet_info *packet_info);
 
 /*================================*/
 /*==========    SIGNAL    ========*/
@@ -62,8 +67,8 @@ void ft_signal();
 /*==========    PACKET    ========*/
 /*================================*/
 
-void ft_send_packet(int sockfd, t_host_info *host_info);
-void ft_receive_packet(int sockfd, t_host_info *host_info);
+void ft_send_packet(int sockfd, t_packet_info *packet_info);
+void ft_receive_packet(int sockfd, t_packet_info *packet_info);
 
 /*================================*/
 /*=========    HELPERS    ========*/
@@ -71,4 +76,4 @@ void ft_receive_packet(int sockfd, t_host_info *host_info);
 
 void print_error_message(int error_code, char *argument);
 void display_help();
-void print_ping_start(t_host_info *host, int data_size);
+void print_ping_start(t_host_info *host);

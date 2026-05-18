@@ -27,7 +27,7 @@ unsigned short calculate_checksum(uint16_t *icmp, size_t bytes)
     return (~sum);
 }
 
-void ft_send_packet(int sockfd, t_host_info *host_info)
+void ft_send_packet(int sockfd, t_packet_info *packet_info)
 {
     t_ping_packet send_packet;
     int sequence_number = 0;
@@ -40,20 +40,14 @@ void ft_send_packet(int sockfd, t_host_info *host_info)
     send_packet.header.checksum = calculate_checksum((uint16_t *)&send_packet.header, sizeof(send_packet.header));
 
     // Send the packet for an echo request
-    if (sendto(sockfd, &send_packet, sizeof(send_packet), 0, host_info->socket_address, host_info->socket_length) == -1)
+    if (sendto(sockfd, &send_packet, sizeof(send_packet), 0, packet_info->socket_address, packet_info->socket_length) == -1)
         print_error_message(6, NULL);
 }
 
-void ft_receive_packet(int sockfd, t_host_info *host_info)
+void ft_receive_packet(int sockfd, t_packet_info *packet_info)
 {
     t_ping_packet recv_packet;
-    int tmp;
 
-    printf("Receiving...\n");
-    if ((tmp = recvfrom(sockfd, &recv_packet, sizeof(recv_packet), 0, host_info->socket_address, &host_info->socket_length)) == -1)
+    if (recvfrom(sockfd, &recv_packet, sizeof(recv_packet), 0, packet_info->socket_address, &packet_info->socket_length) == -1)
         print_error_message(6, NULL);
-
-    printf("Received from: %s\n", host_info->ip);
-
-    printf("Response type: %d \n", recv_packet.header.type);
 }
