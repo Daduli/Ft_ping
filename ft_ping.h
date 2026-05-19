@@ -16,6 +16,8 @@
 #include <unistd.h>
 #include <signal.h>
 #include <netinet/ip_icmp.h>
+#include <time.h>
+#define SIZE 56
 
 /*================================*/
 /*=====    DATA STRUCTURE    =====*/
@@ -37,12 +39,17 @@ typedef struct s_packet_info
 {
 	struct sockaddr *socket_address;
 	socklen_t socket_length;
+	int sequence;
 	int ttl;
+	struct timespec start_time;
+	struct timespec end_time;
 } t_packet_info;
 
 typedef struct s_ping_packet
 {
 	struct icmphdr header;
+	char *data;
+	ssize_t size;
 } t_ping_packet;
 
 /*================================*/
@@ -68,7 +75,7 @@ void ft_signal();
 /*================================*/
 
 void ft_send_packet(int sockfd, t_packet_info *packet_info);
-void ft_receive_packet(int sockfd, t_packet_info *packet_info);
+void ft_receive_packet(int sockfd, t_packet_info *packet_info, char *ip);
 
 /*================================*/
 /*=========    HELPERS    ========*/
@@ -76,4 +83,5 @@ void ft_receive_packet(int sockfd, t_packet_info *packet_info);
 
 void print_error_message(int error_code, char *argument);
 void display_help();
-void print_ping_start(t_host_info *host);
+void print_ping_start(t_host_info *host, bool verbose);
+void print_ping_loop(t_ping_packet recv_packet, char *host_ip, int ttl, float time);

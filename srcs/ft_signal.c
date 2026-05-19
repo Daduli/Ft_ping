@@ -4,7 +4,6 @@ static void signal_handler(int signo)
 {
     if (signo == SIGINT)
         exit(0); // Change this with stopping ping loop
-
     // Add SIGALRM for continous pinging
 }
 

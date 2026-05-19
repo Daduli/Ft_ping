@@ -54,12 +54,20 @@ void display_help()
 }
 
 /* Prints the first message at the start of the ping command */
-void print_ping_start(t_host_info *host)
+void print_ping_start(t_host_info *host, bool verbose)
 {
-	printf("PING %s (%s): 56 data bytes\n", host->name, host->ip);
+	if (!verbose)
+		printf("PING %s (%s): 56 data bytes\n", host->name, host->ip);
+	else
+		printf("PING %s (%s): 56 data bytes, id 0x%x = %d\n", host->name, host->ip, getpid(), getpid());
 }
 
-void print_ping_loop(t_ping_packet recv_packet, char *host_ip, int ttl)
+void print_ping_loop(t_ping_packet recv_packet, char *host_ip, int ttl, float time)
 {
-	printf("%zu bytes from %s: icmp_seq=%d ttl=%d time=%% ms\n", sizeof(recv_packet), host_ip, ntohs(recv_packet.header.un.echo.sequence), ttl);
+	printf("%ld bytes from %s: icmp_seq=%d ttl=%d time=%.3f ms\n", recv_packet.size, host_ip, recv_packet.header.un.echo.sequence, ttl, time);
 }
+
+// void print_ping_end()
+// {
+// 	printf("--- %s ping statistics ---\n%d packets transmitted, %d packets received, %d packet loss\nround-trip min/avg/max/stddev = %.3f/%.3f/%.3f/%03f ms\n");
+// }
