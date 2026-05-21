@@ -17,6 +17,7 @@
 #include <signal.h>
 #include <netinet/ip_icmp.h>
 #include <time.h>
+
 #define SIZE 56
 
 /*================================*/
@@ -43,6 +44,7 @@ typedef struct s_packet_info
 	int ttl;
 	struct timespec start_time;
 	struct timespec end_time;
+	int count;
 } t_packet_info;
 
 typedef struct s_ping_packet
@@ -56,13 +58,13 @@ typedef struct s_ping_packet
 /*==========    PARSE    =========*/
 /*================================*/
 
-void ft_parser(int ac, char **av, t_host_info *host_info, t_flags *flags);
+void ft_parser(int ac, char **av, t_host_info *host_info, t_flags *flags, t_packet_info *packet_info);
 
 /*================================*/
 /*==========    SOCKET    ========*/
 /*================================*/
 
-int ft_socket(t_host_info *host_info, t_packet_info *packet_info);
+int ft_socket(t_packet_info *packet_info);
 
 /*================================*/
 /*==========    SIGNAL    ========*/

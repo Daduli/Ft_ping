@@ -1,13 +1,14 @@
 #include "../ft_ping.h"
 
+extern bool pinging;
+
 static void signal_handler(int signo)
 {
     if (signo == SIGINT)
-        exit(0); // Change this with stopping ping loop
-    // Add SIGALRM for continous pinging
+        pinging = false;
 }
 
-// Change ft_signal accordingly with what is change/added uptop
+// Handle any SINGINT received
 void ft_signal()
 {
     struct sigaction act;

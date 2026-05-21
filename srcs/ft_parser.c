@@ -1,9 +1,35 @@
 #include "../ft_ping.h"
 
-/******************************************************************
- * From an argument, get its type as:                             *
- * 'S' = One dash flag, 'D' = Two dashes flag, 'H' = Host operand *
- ******************************************************************/
+/*
+ * Resolves the DNS and stores the IP address
+ */
+void get_ip_address(t_host_info *host_info, t_packet_info *packet_info)
+{
+	struct addrinfo hints = {
+						.ai_family = AF_INET,
+						.ai_socktype = 0,
+						.ai_protocol = 0},
+					*result;
+
+	// Resolve the DNS, and check if it exists
+	if (getaddrinfo(host_info->name, NULL, &hints, &result))
+		print_error_message(5, NULL);
+
+	// If it exists, stores the IP address
+	struct sockaddr_in *addr = (struct sockaddr_in *)result->ai_addr;
+	inet_ntop(AF_INET, &addr->sin_addr, host_info->ip, INET_ADDRSTRLEN);
+
+	packet_info->socket_address = result->ai_addr;
+	packet_info->socket_length = result->ai_addrlen;
+
+	// Clear the memory space that was allocated for the IP linked list
+	freeaddrinfo(result);
+}
+
+/*
+ * From an argument, get its type as:
+ * 'S' = One dash flag, 'D' = Two dashes flag, 'H' = Host operand
+ */
 char get_argument_type(char *argument)
 {
 	if (argument[0] == '-')
@@ -17,12 +43,12 @@ char get_argument_type(char *argument)
 		return ('H');
 }
 
-/****************************************************************************
- * For single dash flag, parse the argument in order to find all the flags. *
- * Supported flags:                                                         *
- * -v	verbose output                                                      *
- * -?	help list                                                           *
- ****************************************************************************/
+/*
+ * For single dash flag, parse the argument in order to find all the flags.
+ * Supported flags:
+ * -v	verbose output
+ * -?	help list
+ */
 void get_single_dash_flag(char *argument, t_flags *flags)
 {
 	// i = 1 to skip the '-' at the beginning of the string
@@ -43,12 +69,12 @@ void get_single_dash_flag(char *argument, t_flags *flags)
 	}
 }
 
-/****************************************************************************
- * For double dash flag, parse the argument in order to the flag.           *
- * Supported flags:                                                         *
- * --verbose	verbose output                                              *
- * --help		help list                                                   *
- ****************************************************************************/
+/*
+ * For double dash flag, parse the argument in order to the flag.
+ * Supported flags:
+ * --verbose	verbose output
+ * --help		help list
+ */
 void get_double_dash_flag(char *argument, t_flags *flags)
 {
 	if (!strcmp(argument, "verbose"))
@@ -59,7 +85,7 @@ void get_double_dash_flag(char *argument, t_flags *flags)
 		print_error_message(2, argument);
 }
 
-void ft_parser(int ac, char **av, t_host_info *host_info, t_flags *flags)
+void ft_parser(int ac, char **av, t_host_info *host_info, t_flags *flags, t_packet_info *packet_info)
 {
 	int host_count = 0;
 
@@ -83,4 +109,7 @@ void ft_parser(int ac, char **av, t_host_info *host_info, t_flags *flags)
 		print_error_message(3, NULL);
 	else if (host_count > 1)
 		print_error_message(4, NULL);
+
+	// Check if the hostname exist, if so, get its ip
+	get_ip_address(host_info, packet_info);
 }
