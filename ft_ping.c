@@ -39,7 +39,7 @@ int main(int ac, char **av)
 	while (pinging)
 	{
 		ft_send_packet(sockfd, &packet_info, &stats);
-		ft_receive_packet(sockfd, &packet_info, &stats, host_info.ip);
+		ft_receive_packet(sockfd, &packet_info, &stats, flags, host_info.ip);
 		sleep(1); // Wait X seconds between every ping
 	}
 

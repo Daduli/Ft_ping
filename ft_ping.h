@@ -31,6 +31,7 @@ typedef struct s_flags
 {
 	bool verbose;
 	bool help;
+	bool quiet;
 } t_flags;
 
 // Information about the host to ping
@@ -96,7 +97,7 @@ void ft_signal();
 /*================================*/
 
 void ft_send_packet(int sockfd, t_packet_info *packet_info, t_ping_stat *stats);
-void ft_receive_packet(int sockfd, t_packet_info *packet_info, t_ping_stat *stats, char *ip);
+void ft_receive_packet(int sockfd, t_packet_info *packet_info, t_ping_stat *stats, t_flags flags, char *ip);
 
 /*================================*/
 /*=========    HELPERS    ========*/

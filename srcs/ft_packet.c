@@ -53,7 +53,7 @@ void ft_send_packet(int sockfd, t_packet_info *packet_info, t_ping_stat *stats)
     free(send_packet);
 }
 
-void ft_receive_packet(int sockfd, t_packet_info *packet_info, t_ping_stat *stats, char *ip)
+void ft_receive_packet(int sockfd, t_packet_info *packet_info, t_ping_stat *stats, t_flags flags, char *ip)
 {
     ssize_t packet_size = sizeof(t_packet_info) + (SIZE - sizeof(t_packet_info));
     t_ping_packet *recv_packet = malloc(packet_size);
@@ -81,7 +81,8 @@ void ft_receive_packet(int sockfd, t_packet_info *packet_info, t_ping_stat *stat
     stats->avg_time += time_ms;
     stats->square_avg_time += time_ms * time_ms;
 
-    print_ping_loop(*recv_packet, ip, packet_info->ttl, time_ms);
+    if (!flags.quiet)
+        print_ping_loop(*recv_packet, ip, packet_info->ttl, time_ms);
 
     free(recv_packet);
 }

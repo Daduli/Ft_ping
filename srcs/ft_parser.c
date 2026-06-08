@@ -62,6 +62,9 @@ void get_single_dash_flag(char *argument, t_flags *flags)
 		case '?':
 			flags->help = true;
 			break;
+		case 'q':
+			flags->quiet = true;
+			break;
 		default:
 			print_error_message(1, argument + i);
 			break;
@@ -81,8 +84,12 @@ void get_double_dash_flag(char *argument, t_flags *flags)
 		flags->verbose = true;
 	else if (!strcmp(argument, "help"))
 		flags->help = true;
+	else if (!strcmp(argument, "quiet"))
+		flags->quiet = true;
 	else
 		print_error_message(2, argument);
+
+	printf("Quiet: %d\n", flags->quiet);
 }
 
 void ft_parser(int ac, char **av, t_host_info *host_info, t_flags *flags, t_packet_info *packet_info)
