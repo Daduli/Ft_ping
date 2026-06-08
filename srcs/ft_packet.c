@@ -27,7 +27,7 @@ unsigned short calculate_checksum(uint16_t *icmp, size_t bytes)
     return (~sum);
 }
 
-void ft_send_packet(int sockfd, t_packet_info *packet_info)
+void ft_send_packet(int sockfd, t_packet_info *packet_info, t_ping_stat *stats)
 {
     ssize_t packet_size = sizeof(t_packet_info) + (SIZE - sizeof(t_packet_info));
     t_ping_packet *send_packet = malloc(packet_size);
@@ -45,22 +45,26 @@ void ft_send_packet(int sockfd, t_packet_info *packet_info)
     // Register the time when the packet was sent
     clock_gettime(CLOCK_MONOTONIC, &packet_info->start_time);
 
-    int tmp; // Don't forget to remove this when done
     // Send the packet for an echo request
-    if ((tmp = sendto(sockfd, send_packet, packet_size, 0, packet_info->socket_address, packet_info->socket_length)) == -1)
+    if ((sendto(sockfd, send_packet, packet_size, 0, packet_info->socket_address, packet_info->socket_length)) == -1)
         print_error_message(6, NULL);
+    stats->nb_sent++;
 
     free(send_packet);
 }
 
-void ft_receive_packet(int sockfd, t_packet_info *packet_info, char *ip)
+void ft_receive_packet(int sockfd, t_packet_info *packet_info, t_ping_stat *stats, char *ip)
 {
     ssize_t packet_size = sizeof(t_packet_info) + (SIZE - sizeof(t_packet_info));
     t_ping_packet *recv_packet = malloc(packet_size);
 
-    int tmp; // Don't forget to remove this when done
-    if ((tmp = recvfrom(sockfd, recv_packet, packet_size, 0, packet_info->socket_address, &packet_info->socket_length)) == -1)
+    // Receive the response from the echo request sent
+    if ((recvfrom(sockfd, recv_packet, packet_size, 0, packet_info->socket_address, &packet_info->socket_length)) == -1)
         print_error_message(6, NULL);
+
+    // Check if the response is an echo reply
+    if (recv_packet->header.type == ICMP_ECHOREPLY)
+        stats->nb_received++;
 
     // Register the time when the packet was received
     clock_gettime(CLOCK_MONOTONIC, &packet_info->end_time);
@@ -69,6 +73,13 @@ void ft_receive_packet(int sockfd, t_packet_info *packet_info, char *ip)
     packet_info->end_time.tv_sec -= packet_info->start_time.tv_sec;
     packet_info->end_time.tv_nsec -= packet_info->start_time.tv_nsec;
     float time_ms = (float)packet_info->end_time.tv_sec * 1000 + (float)packet_info->end_time.tv_nsec / 1000000;
+
+    if (time_ms > stats->max_time)
+        stats->max_time = time_ms;
+    if (time_ms < stats->min_time)
+        stats->min_time = time_ms;
+    stats->avg_time += time_ms;
+    stats->square_avg_time += time_ms * time_ms;
 
     print_ping_loop(*recv_packet, ip, packet_info->ttl, time_ms);
 

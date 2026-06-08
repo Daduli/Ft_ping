@@ -8,7 +8,7 @@
  * Code 3: no host
  * Code 4: more than one host
  * Code 5: host not found
- * Code 6: error during socket creation
+ * Code 6: internal error
  */
 void print_error_message(int error_code, char *argument)
 {
@@ -49,7 +49,11 @@ void print_error_message(int error_code, char *argument)
 /* Function used to print the message from the -? or --help flags */
 void display_help()
 {
-	printf("Usage: ./ft_ping [OPTIONS...] HOST ...\nSend ICMP ECHO_REQUEST packets to network hosts.\n\n Options:\n  -v, --verbose		verbose output\n  -?, --help		give this help list\n");
+	printf("Usage: ./ft_ping [OPTIONS...] HOST ...\n"
+		   "Send ICMP ECHO_REQUEST packets to network hosts.\n\n"
+		   " Options:\n"
+		   "  -v, --verbose		verbose output\n"
+		   "  -?, --help		give this help list\n");
 	exit(0);
 }
 
@@ -62,12 +66,25 @@ void print_ping_start(t_host_info *host, bool verbose)
 		printf("PING %s (%s): 56 data bytes, id 0x%x = %d\n", host->name, host->ip, getpid(), getpid());
 }
 
+/* Prints info for each packet received */
 void print_ping_loop(t_ping_packet recv_packet, char *host_ip, int ttl, float time)
 {
 	printf("%ld bytes from %s: icmp_seq=%d ttl=%d time=%.3f ms\n", recv_packet.size, host_ip, recv_packet.header.un.echo.sequence, ttl, time);
 }
 
-// void print_ping_end()
-// {
-// 	printf("--- %s ping statistics ---\n%d packets transmitted, %d packets received, %d packet loss\nround-trip min/avg/max/stddev = %.3f/%.3f/%.3f/%03f ms\n");
-// }
+/* Set up the stats to display */
+void calculate_stats(t_ping_stat *stats)
+{
+	stats->percentage_lost = (1.0 - (float)(stats->nb_received) / (float)stats->nb_sent) * 100.0;
+	stats->avg_time /= stats->nb_received;
+	stats->square_avg_time /= stats->nb_received;
+	stats->stddev = sqrt(((stats->square_avg_time - (stats->avg_time * stats->avg_time)) * stats->nb_received) / (stats->nb_received - 1));
+}
+
+/* Prints the ping stats after the end of the loop */
+void print_ping_end(char *host_name, t_ping_stat stats)
+{
+	printf("--- %s ping statistics ---\n%d packets transmitted, %d packets received, %d%% packet loss\n"
+		   "round-trip min/avg/max/stddev = %.3f/%.3f/%.3f/%.3f ms\n",
+		   host_name, stats.nb_sent, stats.nb_received, stats.percentage_lost, stats.min_time, stats.avg_time, stats.max_time, stats.stddev);
+}
