@@ -23,6 +23,10 @@ int main(int ac, char **av)
 		.stddev = 0,
 	};
 
+	// Root permission is mandatory because of raw socket
+	if (getuid())
+		print_error_message(8, NULL, 0);
+
 	// Parse the arguments to get the hostname and the flags, if any
 	ft_parser(ac, av, &host_info, &flags, &packet_info);
 

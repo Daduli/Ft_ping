@@ -3,68 +3,91 @@
 /*
  * Calculate the checksum for the ICMP header (Environment is 32 bits)
  */
-unsigned short calculate_checksum(uint16_t *icmp, size_t bytes)
+unsigned short calculate_checksum(void *icmp, int bytes)
 {
+    unsigned short *buf = icmp;
     // Sum must start at 0
-    int sum = 0;
+    unsigned int sum = 0;
+    unsigned short result;
 
     // Get the sum of the ICMP header + data, 16 bits at a time
     while (bytes > 1)
     {
-        sum += *icmp++;
+        sum += *buf++;
         bytes -= 2;
     }
 
     // Add leftover byte, if there's any
     if (bytes == 1)
-        sum += *(unsigned short *)icmp;
+        sum += *(unsigned char *)buf;
 
     // Fold 32 bits sum to 16 bits
-    sum = (sum & 0xffff) + (sum >> 16);
+    sum = (sum >> 16) + (sum & 0xFFFF);
     sum += (sum >> 16);
 
     // Perform one's complement on the sum
-    return (~sum);
+    result = ~sum;
+    return (result);
 }
 
 void ft_send_packet(int sockfd, t_packet_info *packet_info, t_ping_stat *stats)
 {
-    ssize_t packet_size = sizeof(t_packet_info) + (SIZE - sizeof(t_packet_info));
-    t_ping_packet *send_packet = malloc(packet_size);
-
-    // Store the size of the packet to be sent
-    send_packet->size = packet_size;
+    t_ping_packet packet;
+    size_t packet_size = sizeof(struct icmphdr) + SIZE;
 
     // Fill the ICMP header with the information needed for the echo request
-    send_packet->header.type = ICMP_ECHO;
-    send_packet->header.code = 0;
-    send_packet->header.un.echo.id = getpid();
-    send_packet->header.un.echo.sequence = packet_info->sequence++;
-    send_packet->header.checksum = calculate_checksum((uint16_t *)&send_packet->header, sizeof(send_packet->header));
+    packet.header.type = ICMP_ECHO;
+    packet.header.code = 0;
+    packet.header.checksum = 0;
+    packet.header.un.echo.id = getpid();
+    packet.header.un.echo.sequence = htons(packet_info->sequence++);
+    packet.data = malloc(packet_size);
+
+    // Merge the content of the header and data
+    memset(packet.data + sizeof(struct icmphdr), '0', SIZE);
+    memcpy(packet.data, &(packet.header), sizeof(packet.header));
+
+    // Define the checksum to be sent
+    ((struct icmphdr *)packet.data)->checksum = calculate_checksum(packet.data, packet_size);
 
     // Register the time when the packet was sent
     clock_gettime(CLOCK_MONOTONIC, &packet_info->start_time);
 
     // Send the packet for an echo request
-    if ((sendto(sockfd, send_packet, packet_size, 0, packet_info->socket_address, packet_info->socket_length)) == -1)
-        print_error_message(6, NULL);
+    if ((sendto(sockfd, packet.data, packet_size, 0, (struct sockaddr *)&packet_info->socket_address, sizeof(packet_info->socket_address))) == -1)
+        print_error_message(6, NULL, 0);
     stats->nb_sent++;
 
-    free(send_packet);
+    free(packet.data);
 }
 
 void ft_receive_packet(int sockfd, t_packet_info *packet_info, t_ping_stat *stats, t_flags flags, char *ip)
 {
-    ssize_t packet_size = sizeof(t_packet_info) + (SIZE - sizeof(t_packet_info));
-    t_ping_packet *recv_packet = malloc(packet_size);
+    char buffer[1024];
+    struct sockaddr_in response_addr;
+    socklen_t addr_len = sizeof(response_addr);
+    struct msghdr message;
+    struct iovec iov[1];
 
-    // Receive the response from the echo request sent
-    if ((recvfrom(sockfd, recv_packet, packet_size, 0, packet_info->socket_address, &packet_info->socket_length)) == -1)
-        print_error_message(6, NULL);
+    iov[0].iov_base = buffer;
+    iov[0].iov_len = sizeof(buffer);
+    memset(&message, 0, sizeof(message));
+    message.msg_name = &response_addr;
+    message.msg_namelen = addr_len;
+    message.msg_iov = iov;
+    message.msg_iovlen = 1;
+
+    if ((recvmsg(sockfd, &message, 0)) == -1)
+        print_error_message(6, NULL, 0);
+
+    struct iphdr *ip_hdr = (struct iphdr *)buffer;
+    struct icmphdr *icmp_response = (struct icmphdr *)(buffer + ip_hdr->ihl * 4);
 
     // Check if the response is an echo reply
-    if (recv_packet->header.type == ICMP_ECHOREPLY)
+    if (icmp_response->un.echo.id == getpid() && icmp_response->type == ICMP_ECHOREPLY)
         stats->nb_received++;
+
+    /* Add Destination unreachable error handling */
 
     // Register the time when the packet was received
     clock_gettime(CLOCK_MONOTONIC, &packet_info->end_time);
@@ -82,7 +105,5 @@ void ft_receive_packet(int sockfd, t_packet_info *packet_info, t_ping_stat *stat
     stats->square_avg_time += time_ms * time_ms;
 
     if (!flags.quiet)
-        print_ping_loop(*recv_packet, ip, packet_info->ttl, time_ms);
-
-    free(recv_packet);
+        print_ping_loop(ntohs(icmp_response->un.echo.sequence), ip, packet_info->ttl, time_ms);
 }

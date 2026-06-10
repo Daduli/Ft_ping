@@ -18,6 +18,7 @@
 #include <netinet/ip_icmp.h>
 #include <time.h>
 #include <math.h>
+#include <ctype.h>
 
 // For IPv4, default ping packet is 56 bytes of data (28 bytes for header, excluded)
 #define SIZE 56
@@ -44,8 +45,7 @@ typedef struct s_host_info
 // All infos for packet exchange (sending & receiving)
 typedef struct s_packet_info
 {
-	struct sockaddr *socket_address;
-	socklen_t socket_length;
+	struct sockaddr_in socket_address;
 	int sequence;
 	int ttl;
 	struct timespec start_time;
@@ -58,7 +58,6 @@ typedef struct s_ping_packet
 {
 	struct icmphdr header;
 	char *data;
-	ssize_t size;
 } t_ping_packet;
 
 // Ping stats for the end
@@ -103,9 +102,9 @@ void ft_receive_packet(int sockfd, t_packet_info *packet_info, t_ping_stat *stat
 /*=========    HELPERS    ========*/
 /*================================*/
 
-void print_error_message(int error_code, char *argument);
+void print_error_message(int error_code, char *argument, int position);
 void display_help();
 void print_ping_start(t_host_info *host, bool verbose);
-void print_ping_loop(t_ping_packet recv_packet, char *host_ip, int ttl, float time);
+void print_ping_loop(uint16_t sequence, char *host_ip, int ttl, float time);
 void calculate_stats(t_ping_stat *stats);
 void print_ping_end(char *host_name, t_ping_stat stats);

@@ -10,7 +10,7 @@ SRCS += ft_ping.c \
 OBJS = $(SRCS:.c=.o)
 
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror
+# CFLAGS = -Wall -Wextra -Werror
 
 $(NAME) :	$(OBJS)
 	gcc $(CFLAGS) $(OBJS) -lm -o $(NAME)

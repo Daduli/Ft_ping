@@ -1,5 +1,26 @@
 #include "../ft_ping.h"
 
+bool compare_flag(char *argument, char *flag)
+{
+	int length = strlen(flag);
+
+	for (int i = 0; i < length; i++)
+	{
+		if (argument[i] != flag[i])
+			return (1);
+	}
+	return (0);
+}
+
+void check_number(char *argument)
+{
+	for (int i = 0; argument[i]; i++)
+	{
+		if (!isdigit(argument[i]))
+			print_error_message(7, argument, i);
+	}
+}
+
 /*
  * Resolves the DNS and stores the IP address
  */
@@ -7,20 +28,20 @@ void get_ip_address(t_host_info *host_info, t_packet_info *packet_info)
 {
 	struct addrinfo hints = {
 						.ai_family = AF_INET,
-						.ai_socktype = 0,
-						.ai_protocol = 0},
+						.ai_socktype = SOCK_RAW,
+						.ai_protocol = IPPROTO_ICMP},
 					*result;
 
 	// Resolve the DNS, and check if it exists
 	if (getaddrinfo(host_info->name, NULL, &hints, &result))
-		print_error_message(5, NULL);
+		print_error_message(5, NULL, 0);
 
 	// If it exists, stores the IP address
 	struct sockaddr_in *addr = (struct sockaddr_in *)result->ai_addr;
-	inet_ntop(AF_INET, &addr->sin_addr, host_info->ip, INET_ADDRSTRLEN);
+	inet_ntop(AF_INET, &(addr->sin_addr), host_info->ip, INET_ADDRSTRLEN);
 
-	packet_info->socket_address = result->ai_addr;
-	packet_info->socket_length = result->ai_addrlen;
+	packet_info->socket_address.sin_family = AF_INET;
+	packet_info->socket_address.sin_addr = addr->sin_addr;
 
 	// Clear the memory space that was allocated for the IP linked list
 	freeaddrinfo(result);
@@ -66,7 +87,7 @@ void get_single_dash_flag(char *argument, t_flags *flags)
 			flags->quiet = true;
 			break;
 		default:
-			print_error_message(1, argument + i);
+			print_error_message(1, argument + i, 0);
 			break;
 		}
 	}
@@ -78,7 +99,7 @@ void get_single_dash_flag(char *argument, t_flags *flags)
  * --verbose	verbose output
  * --help		help list
  */
-void get_double_dash_flag(char *argument, t_flags *flags)
+void get_double_dash_flag(char *argument, t_flags *flags, t_packet_info *packet_info)
 {
 	if (!strcmp(argument, "verbose"))
 		flags->verbose = true;
@@ -86,10 +107,14 @@ void get_double_dash_flag(char *argument, t_flags *flags)
 		flags->help = true;
 	else if (!strcmp(argument, "quiet"))
 		flags->quiet = true;
+	else if (!compare_flag(argument, "ttl="))
+	{
+		check_number(argument + 4);
+		packet_info->ttl = atoi(argument + 4);
+		printf("Time to live: %d\n", packet_info->ttl);
+	}
 	else
-		print_error_message(2, argument);
-
-	printf("Quiet: %d\n", flags->quiet);
+		print_error_message(2, argument, 0);
 }
 
 void ft_parser(int ac, char **av, t_host_info *host_info, t_flags *flags, t_packet_info *packet_info)
@@ -107,15 +132,15 @@ void ft_parser(int ac, char **av, t_host_info *host_info, t_flags *flags, t_pack
 		else if (type == 'S')
 			get_single_dash_flag(av[i], flags);
 		else if (type == 'D')
-			get_double_dash_flag(av[i] + 2, flags);
+			get_double_dash_flag(av[i] + 2, flags, packet_info);
 	}
 
 	if (flags->help)
 		display_help();
 	else if (host_count < 1)
-		print_error_message(3, NULL);
+		print_error_message(3, NULL, 0);
 	else if (host_count > 1)
-		print_error_message(4, NULL);
+		print_error_message(4, NULL, 0);
 
 	// Check if the hostname exist, if so, get its ip
 	get_ip_address(host_info, packet_info);

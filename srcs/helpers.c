@@ -9,8 +9,10 @@
  * Code 4: more than one host
  * Code 5: host not found
  * Code 6: internal error
+ * Code 7: invalid format for number
+ * Cide 8: user is not root
  */
-void print_error_message(int error_code, char *argument)
+void print_error_message(int error_code, char *argument, int position)
 {
 	char *info_message = "Try './ft_ping --help' or './ft_ping -?' for more information.\n";
 
@@ -40,7 +42,14 @@ void print_error_message(int error_code, char *argument)
 		printf("ft_ping: %s\n", strerror(errno));
 		exit(6);
 		break;
-
+	case 7:
+		printf("ft_ping: invalid value ('%s' near '%s')\n", argument, argument + position);
+		exit(7);
+		break;
+	case 8:
+		printf("ft_ping: root permission needed to run ft_ping\n");
+		exit(8);
+		break;
 	default:
 		break;
 	}
@@ -67,9 +76,9 @@ void print_ping_start(t_host_info *host, bool verbose)
 }
 
 /* Prints info for each packet received */
-void print_ping_loop(t_ping_packet recv_packet, char *host_ip, int ttl, float time)
+void print_ping_loop(uint16_t sequence, char *host_ip, int ttl, float time)
 {
-	printf("%ld bytes from %s: icmp_seq=%d ttl=%d time=%.3f ms\n", recv_packet.size, host_ip, recv_packet.header.un.echo.sequence, ttl, time);
+	printf("%d bytes from %s: icmp_seq=%d ttl=%d time=%.3f ms\n", SIZE, host_ip, sequence, ttl, time);
 }
 
 /* Set up the stats to display */
