@@ -33,7 +33,7 @@ unsigned short calculate_checksum(void *icmp, int bytes)
 void ft_send_packet(int sockfd, t_packet_info *packet_info, t_ping_stat *stats)
 {
     t_ping_packet packet;
-    size_t packet_size = sizeof(struct icmphdr) + SIZE;
+    size_t packet_size = sizeof(struct icmphdr) + packet_info->size;
 
     // Fill the ICMP header with the information needed for the echo request
     packet.header.type = ICMP_ECHO;
@@ -44,7 +44,7 @@ void ft_send_packet(int sockfd, t_packet_info *packet_info, t_ping_stat *stats)
     packet.data = malloc(packet_size);
 
     // Merge the content of the header and data
-    memset(packet.data + sizeof(struct icmphdr), '0', SIZE);
+    memset(packet.data + sizeof(struct icmphdr), '0', packet_info->size);
     memcpy(packet.data, &(packet.header), sizeof(packet.header));
 
     // Define the checksum to be sent
@@ -55,7 +55,7 @@ void ft_send_packet(int sockfd, t_packet_info *packet_info, t_ping_stat *stats)
 
     // Send the packet for an echo request
     if ((sendto(sockfd, packet.data, packet_size, 0, (struct sockaddr *)&packet_info->socket_address, sizeof(packet_info->socket_address))) == -1)
-        print_error_message(6, NULL, 0);
+        print_error_message(0, NULL, 0);
     stats->nb_sent++;
 
     free(packet.data);
@@ -68,6 +68,7 @@ void ft_receive_packet(int sockfd, t_packet_info *packet_info, t_ping_stat *stat
     socklen_t addr_len = sizeof(response_addr);
     struct msghdr message;
     struct iovec iov[1];
+    ssize_t bytes_read;
 
     iov[0].iov_base = buffer;
     iov[0].iov_len = sizeof(buffer);
@@ -77,15 +78,25 @@ void ft_receive_packet(int sockfd, t_packet_info *packet_info, t_ping_stat *stat
     message.msg_iov = iov;
     message.msg_iovlen = 1;
 
-    if ((recvmsg(sockfd, &message, 0)) == -1)
-        print_error_message(6, NULL, 0);
+    bytes_read = recvmsg(sockfd, &message, MSG_DONTWAIT);
+
+    if (errno != EAGAIN && errno != EWOULDBLOCK && bytes_read == -1)
+        print_error_message(0, NULL, 0);
+    else if (bytes_read == -1)
+        return;
 
     struct iphdr *ip_hdr = (struct iphdr *)buffer;
     struct icmphdr *icmp_response = (struct icmphdr *)(buffer + ip_hdr->ihl * 4);
 
     // Check if the response is an echo reply
-    if (icmp_response->un.echo.id == getpid() && icmp_response->type == ICMP_ECHOREPLY)
+    if (icmp_response->un.echo.id == getpid())
+    {
         stats->nb_received++;
+        if (icmp_response->type == ICMP_ECHOREPLY)
+            stats->nb_received_success++;
+    }
+    // else
+    //     return;
 
     /* Add Destination unreachable error handling */
 
@@ -105,5 +116,5 @@ void ft_receive_packet(int sockfd, t_packet_info *packet_info, t_ping_stat *stat
     stats->square_avg_time += time_ms * time_ms;
 
     if (!flags.quiet)
-        print_ping_loop(ntohs(icmp_response->un.echo.sequence), ip, packet_info->ttl, time_ms);
+        print_ping_loop(ntohs(icmp_response->un.echo.sequence), ip, packet_info->ttl, time_ms, ntohs(ip_hdr->tot_len) - (ip_hdr->ihl * 4));
 }

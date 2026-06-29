@@ -3,14 +3,19 @@
 /*
  * Takes an error code and print the related message.
  *
+ * Code 0: internal error
  * Code 1: unrecognized single dashed flag
  * Code 2: unrecognized double dashed flag
  * Code 3: no host
  * Code 4: more than one host
  * Code 5: host not found
- * Code 6: internal error
- * Code 7: invalid format for number
- * Cide 8: user is not root
+ * Code 6: double dash missing argument
+ * Code 7: single dashed flag is not the last
+ * Code 8: user is not root
+ * Code 9: single dash missing argument
+ * Code 10: invalid flag argument
+ * Code 11: value too small
+ * code 12: value too big
  */
 void print_error_message(int error_code, char *argument, int position)
 {
@@ -39,18 +44,33 @@ void print_error_message(int error_code, char *argument, int position)
 		exit(5);
 		break;
 	case 6:
-		printf("ft_ping: %s\n", strerror(errno));
+		printf("ft_ping: option '%s' requires an argument\n%s", argument, info_message);
 		exit(6);
 		break;
 	case 7:
-		printf("ft_ping: invalid value ('%s' near '%s')\n", argument, argument + position);
+		printf("ft_ping: option needs to be last -- '%c'\n", argument[0]);
 		exit(7);
 		break;
 	case 8:
 		printf("ft_ping: root permission needed to run ft_ping\n");
 		exit(8);
 		break;
+	case 9:
+		printf("ft_ping: option requires an argument -- '%s'\n%s", argument, info_message);
+		exit(9);
+		break;
+	case 10:
+		printf("ft_ping: invalid value ('%s' near '%s')\n", argument, argument + position);
+		exit(10);
+	case 11:
+		printf("ft_ping: option value too small: %s\n", argument);
+		exit(11);
+	case 12:
+		printf("ft_ping: option value too big: %s\n", argument);
+		exit(12);
 	default:
+		printf("ft_ping: %s\n", strerror(errno));
+		exit(0);
 		break;
 	}
 }
@@ -67,18 +87,18 @@ void display_help()
 }
 
 /* Prints the first message at the start of the ping command */
-void print_ping_start(t_host_info *host, bool verbose)
+void print_ping_start(t_host_info *host, bool verbose, int data_size)
 {
 	if (!verbose)
-		printf("PING %s (%s): 56 data bytes\n", host->name, host->ip);
+		printf("PING %s (%s): %d data bytes\n", host->name, host->ip, data_size);
 	else
-		printf("PING %s (%s): 56 data bytes, id 0x%x = %d\n", host->name, host->ip, getpid(), getpid());
+		printf("PING %s (%s): %d data bytes, id 0x%x = %d\n", host->name, host->ip, data_size, getpid(), getpid());
 }
 
 /* Prints info for each packet received */
-void print_ping_loop(uint16_t sequence, char *host_ip, int ttl, float time)
+void print_ping_loop(uint16_t sequence, char *host_ip, int ttl, float time, int data_size)
 {
-	printf("%d bytes from %s: icmp_seq=%d ttl=%d time=%.3f ms\n", SIZE, host_ip, sequence, ttl, time);
+	printf("%d bytes from %s: icmp_seq=%d ttl=%d time=%.3f ms\n", data_size, host_ip, sequence, ttl, time);
 }
 
 /* Set up the stats to display */
@@ -93,7 +113,8 @@ void calculate_stats(t_ping_stat *stats)
 /* Prints the ping stats after the end of the loop */
 void print_ping_end(char *host_name, t_ping_stat stats)
 {
-	printf("--- %s ping statistics ---\n%d packets transmitted, %d packets received, %d%% packet loss\n"
-		   "round-trip min/avg/max/stddev = %.3f/%.3f/%.3f/%.3f ms\n",
-		   host_name, stats.nb_sent, stats.nb_received, stats.percentage_lost, stats.min_time, stats.avg_time, stats.max_time, stats.stddev);
+	printf("--- %s ping statistics ---\n%d packets transmitted, %d packets received, %d%% packet loss\n",
+		   host_name, stats.nb_sent, stats.nb_received, stats.percentage_lost);
+	if (stats.nb_received)
+		printf("round-trip min/avg/max/stddev = %.3f/%.3f/%.3f/%.3f ms\n", stats.min_time, stats.avg_time, stats.max_time, stats.stddev);
 }
