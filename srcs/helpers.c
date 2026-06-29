@@ -98,16 +98,24 @@ void print_ping_start(t_host_info *host, bool verbose, int data_size)
 /* Prints info for each packet received */
 void print_ping_loop(uint16_t sequence, char *host_ip, int ttl, float time, int data_size)
 {
-	printf("%d bytes from %s: icmp_seq=%d ttl=%d time=%.3f ms\n", data_size, host_ip, sequence, ttl, time);
+	if (data_size >= 8 && data_size < 24)
+		printf("%d bytes from %s: icmp_seq=%d ttl=0\n", data_size, host_ip, sequence);
+	else
+		printf("%d bytes from %s: icmp_seq=%d ttl=%d time=%.3f ms\n", data_size, host_ip, sequence, ttl, time);
 }
 
 /* Set up the stats to display */
 void calculate_stats(t_ping_stat *stats)
 {
 	stats->percentage_lost = (1.0 - (float)(stats->nb_received) / (float)stats->nb_sent) * 100.0;
-	stats->avg_time /= stats->nb_received;
-	stats->square_avg_time /= stats->nb_received;
-	stats->stddev = sqrt(((stats->square_avg_time - (stats->avg_time * stats->avg_time)) * stats->nb_received) / (stats->nb_received - 1));
+	stats->avg_time /= stats->nb_received_success;
+	if (stats->nb_received_success == 1)
+		stats->stddev = 0.0;
+	else
+	{
+		stats->square_avg_time /= stats->nb_received;
+		stats->stddev = sqrt(((stats->square_avg_time - (stats->avg_time * stats->avg_time)) * stats->nb_received) / (stats->nb_received - 1));
+	}
 }
 
 /* Prints the ping stats after the end of the loop */

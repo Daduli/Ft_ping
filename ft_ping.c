@@ -26,7 +26,6 @@ int main(int ac, char **av)
 		.percentage_lost = 0,
 		.stddev = 0,
 	};
-	int i = 0;
 
 	// Root permission is mandatory because of raw socket
 	if (getuid())
@@ -34,8 +33,6 @@ int main(int ac, char **av)
 
 	// Parse the arguments to get the hostname and the flags, if any
 	ft_parser(ac, av, &host_info, &flags, &packet_info);
-
-	printf("Count: %d\n", packet_info.count);
 
 	// Create the socket
 	sockfd = ft_socket(&packet_info);
@@ -57,6 +54,7 @@ int main(int ac, char **av)
 				alarm(packet_info.interval);
 		}
 		ft_receive_packet(sockfd, &packet_info, &stats, flags, host_info.ip);
+		// If the count flag is set, stop the loop after receiving the number of packets sent
 		if (packet_info.count > 0 && stats.nb_received == packet_info.count)
 			pinging = false;
 	}

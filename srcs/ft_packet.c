@@ -95,10 +95,8 @@ void ft_receive_packet(int sockfd, t_packet_info *packet_info, t_ping_stat *stat
         if (icmp_response->type == ICMP_ECHOREPLY)
             stats->nb_received_success++;
     }
-    // else
-    //     return;
-
-    /* Add Destination unreachable error handling */
+    else
+        return;
 
     // Register the time when the packet was received
     clock_gettime(CLOCK_MONOTONIC, &packet_info->end_time);
