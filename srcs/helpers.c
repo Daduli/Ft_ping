@@ -75,14 +75,19 @@ void print_error_message(int error_code, char *argument, int position)
 	}
 }
 
-/* Function used to print the message from the -? or --help flags */
+/* Displays the message from the -? or --help flags */
 void display_help()
 {
 	printf("Usage: ./ft_ping [OPTIONS...] HOST ...\n"
 		   "Send ICMP ECHO_REQUEST packets to network hosts.\n\n"
 		   " Options:\n"
-		   "  -v, --verbose		verbose output\n"
-		   "  -?, --help		give this help list\n");
+		   "  -?, --help			give this help list\n"
+		   "  -v, --verbose			verbose output\n"
+		   "  -q, --quiet			quiet output\n"
+		   "  -c, --count NUMBER		stop after sending NUMBER packets\n"
+		   "  -s, --size NUMBER		send NUMBER data octets\n"
+		   "  -i, --interval NUMBER		wait NUMBER seconds between sending each packet\n"
+		   "      --ttl N			specify N as time-to-live\n");
 	exit(0);
 }
 
