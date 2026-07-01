@@ -1,5 +1,6 @@
 #include "../ft_ping.h"
 
+/* Creates a raw socket and sets the TTL parameter */
 int ft_socket(t_packet_info *packet_info)
 {
     // Create a raw socket to send data

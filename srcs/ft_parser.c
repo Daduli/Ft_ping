@@ -205,6 +205,7 @@ void get_double_dash_flag(char *argument, t_flags *flags, bool *is_argument_flag
 		print_error_message(2, argument, 0);
 }
 
+/* Parses the command line arguments */
 void ft_parser(int ac, char **av, t_host_info *host_info, t_flags *flags, t_packet_info *packet_info)
 {
 	int host_count = 0;
