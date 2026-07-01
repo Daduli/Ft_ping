@@ -8,7 +8,7 @@ int main(int ac, char **av)
 	int sockfd;
 	t_host_info host_info = {};
 	t_packet_info packet_info = {
-		.ttl = 64,
+		.ttl = 64, // Default TTL on Linux
 		.sequence = 0,
 		.count = 0,
 		.size = 56, // For IPv4, default ping packet is 56 bytes of data (28 bytes for header, excluded)
@@ -31,25 +31,18 @@ int main(int ac, char **av)
 	if (getuid())
 		print_error_message(8, NULL, 0);
 
-	// Parse the arguments to get the hostname and the flags, if any
 	ft_parser(ac, av, &host_info, &flags, &packet_info);
-
-	// Create the socket
 	sockfd = ft_socket(&packet_info);
-
-	// Setup the signals handling
 	ft_signal();
-
-	// Print the starting info
 	print_ping_start(&host_info, flags.verbose, packet_info.size);
 
-	// Start the ping loop that will receive back the packets sent
 	while (pinging)
 	{
 		if (sending)
 		{
 			ft_send_packet(sockfd, &packet_info, &stats);
 			sending = false;
+			// If the count flag is set, stop the loop after sending the number of packets specified
 			if (stats.nb_sent != packet_info.count)
 				alarm(packet_info.interval);
 		}
@@ -59,8 +52,6 @@ int main(int ac, char **av)
 			pinging = false;
 	}
 
-	// Calculate all the stats needed to display
 	calculate_stats(&stats);
-
 	print_ping_end(host_info.name, stats);
 }

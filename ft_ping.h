@@ -8,8 +8,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
-#include <sys/socket.h>
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <errno.h>
@@ -24,7 +22,6 @@
 /*=====    DATA STRUCTURE    =====*/
 /*================================*/
 
-// All the flags when the command was launched
 typedef struct s_flags
 {
 	bool verbose;
@@ -35,14 +32,13 @@ typedef struct s_flags
 	bool interval;
 } t_flags;
 
-// Information about the host to ping
 typedef struct s_host_info
 {
 	char *name;
 	char ip[INET_ADDRSTRLEN];
 } t_host_info;
 
-// All infos for packet exchange (sending & receiving)
+// Informations for packet exchange (sending & receiving)
 typedef struct s_packet_info
 {
 	struct sockaddr_in socket_address;
@@ -62,7 +58,7 @@ typedef struct s_ping_packet
 	char *data;
 } t_ping_packet;
 
-// Ping stats for the end
+// Ping stats for the end message
 typedef struct s_ping_stat
 {
 	int nb_sent;

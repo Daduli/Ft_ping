@@ -14,8 +14,8 @@
  * Code 8: user is not root
  * Code 9: single dash missing argument
  * Code 10: invalid flag argument
- * Code 11: value too small
- * code 12: value too big
+ * Code 11: argument value too small
+ * code 12: argument value too big
  */
 void print_error_message(int error_code, char *argument, int position)
 {
@@ -91,7 +91,6 @@ void display_help()
 	exit(0);
 }
 
-/* Prints the first message at the start of the ping command */
 void print_ping_start(t_host_info *host, bool verbose, int data_size)
 {
 	if (!verbose)
