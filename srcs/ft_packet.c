@@ -92,7 +92,9 @@ void ft_receive_packet(int sockfd, t_packet_info *packet_info, t_ping_stat *stat
     if (icmp_response->un.echo.id == getpid())
     {
         stats->nb_received++;
-        if (icmp_response->type == ICMP_ECHOREPLY)
+        if (icmp_response->type == ICMP_ECHO)
+            return;
+        else if (icmp_response->type == ICMP_ECHOREPLY)
             stats->nb_received_success++;
     }
     else

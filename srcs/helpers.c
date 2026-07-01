@@ -112,14 +112,14 @@ void print_ping_loop(uint16_t sequence, char *host_ip, int ttl, float time, int 
 /* Set up the stats to display */
 void calculate_stats(t_ping_stat *stats)
 {
-	stats->percentage_lost = (1.0 - (float)(stats->nb_received) / (float)stats->nb_sent) * 100.0;
+	stats->percentage_lost = (1.0 - (float)(stats->nb_received_success) / (float)stats->nb_sent) * 100.0;
 	stats->avg_time /= stats->nb_received_success;
 	if (stats->nb_received_success == 1)
 		stats->stddev = 0.0;
 	else
 	{
-		stats->square_avg_time /= stats->nb_received;
-		stats->stddev = sqrt(((stats->square_avg_time - (stats->avg_time * stats->avg_time)) * stats->nb_received) / (stats->nb_received - 1));
+		stats->square_avg_time /= stats->nb_received_success;
+		stats->stddev = sqrt(((stats->square_avg_time - (stats->avg_time * stats->avg_time)) * stats->nb_received_success) / (stats->nb_received_success - 1));
 	}
 }
 
@@ -127,7 +127,7 @@ void calculate_stats(t_ping_stat *stats)
 void print_ping_end(char *host_name, t_ping_stat stats)
 {
 	printf("--- %s ping statistics ---\n%d packets transmitted, %d packets received, %d%% packet loss\n",
-		   host_name, stats.nb_sent, stats.nb_received, stats.percentage_lost);
+		   host_name, stats.nb_sent, stats.nb_received_success, stats.percentage_lost);
 	if (stats.nb_received)
 		printf("round-trip min/avg/max/stddev = %.3f/%.3f/%.3f/%.3f ms\n", stats.min_time, stats.avg_time, stats.max_time, stats.stddev);
 }
