@@ -121,5 +121,5 @@ void ft_receive_packet(int sockfd, t_packet_info *packet_info, t_ping_stat *stat
     stats->square_avg_time += time_ms * time_ms;
 
     if (!flags.quiet)
-        print_ping_loop(ntohs(icmp_response->un.echo.sequence), ip, packet_info->ttl, time_ms, ntohs(ip_hdr->tot_len) - (ip_hdr->ihl * 4));
+        print_ping_loop(ntohs(icmp_response->un.echo.sequence), ip, ip_hdr->ttl, time_ms, ntohs(ip_hdr->tot_len) - (ip_hdr->ihl * 4));
 }
