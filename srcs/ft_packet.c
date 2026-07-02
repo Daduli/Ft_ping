@@ -1,7 +1,7 @@
 #include "../ft_ping.h"
 
 /*
- * Calculate the checksum for the ICMP header (Environment is 32 bits)
+ * Calculate the checksum for the ICMP header
  */
 unsigned short calculate_checksum(void *icmp, int bytes)
 {
@@ -70,6 +70,7 @@ void ft_receive_packet(int sockfd, t_packet_info *packet_info, t_ping_stat *stat
     struct iovec iov[1];
     ssize_t bytes_read;
 
+    // Set up the message structure to receive the packet
     iov[0].iov_base = buffer;
     iov[0].iov_len = sizeof(buffer);
     memset(&message, 0, sizeof(message));
@@ -78,8 +79,8 @@ void ft_receive_packet(int sockfd, t_packet_info *packet_info, t_ping_stat *stat
     message.msg_iov = iov;
     message.msg_iovlen = 1;
 
+    // Receive the packet without blocking
     bytes_read = recvmsg(sockfd, &message, MSG_DONTWAIT);
-
     if (errno != EAGAIN && errno != EWOULDBLOCK && bytes_read == -1)
         print_error_message(0, NULL, 0);
     else if (bytes_read == -1)
@@ -88,7 +89,7 @@ void ft_receive_packet(int sockfd, t_packet_info *packet_info, t_ping_stat *stat
     struct iphdr *ip_hdr = (struct iphdr *)buffer;
     struct icmphdr *icmp_response = (struct icmphdr *)(buffer + ip_hdr->ihl * 4);
 
-    // Check if the response is an echo reply
+    // If the pakcet received has the same PID then it reached its destination
     if (icmp_response->un.echo.id == getpid())
     {
         stats->nb_received++;
@@ -97,11 +98,13 @@ void ft_receive_packet(int sockfd, t_packet_info *packet_info, t_ping_stat *stat
         else if (icmp_response->type == ICMP_ECHOREPLY)
             stats->nb_received_success++;
     }
+    // The response came from a router and is an error
     else if (flags.verbose && (icmp_response->type == ICMP_TIME_EXCEEDED || icmp_response->type == ICMP_DEST_UNREACH))
     {
         print_ping_error(ip, icmp_response->type);
         return;
     }
+    // Nothing was received
     else
         return;
 

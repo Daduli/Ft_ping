@@ -11,7 +11,9 @@ static void signal_handler(int signo)
         sending = true;
 }
 
-// Handle any SINGINT received
+/*
+ * Handles SIGINT and SIGALRM signals
+ */
 void ft_signal()
 {
     struct sigaction act;

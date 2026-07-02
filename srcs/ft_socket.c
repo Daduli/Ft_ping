@@ -1,9 +1,10 @@
 #include "../ft_ping.h"
 
-/* Creates a raw socket and sets the TTL parameter */
+/*
+ * Creates a raw socket and sets its TTL parameter
+ */
 int ft_socket(t_packet_info *packet_info)
 {
-    // Create a raw socket to send data
     int sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
     if (sockfd < 0)
         print_error_message(0, NULL, 0);

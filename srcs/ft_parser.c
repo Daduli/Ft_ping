@@ -1,5 +1,8 @@
 #include "../ft_ping.h"
 
+/*
+ * Compares a flag with an argument
+ */
 bool compare_flag(char *argument, char *flag)
 {
 	int i = 0;
@@ -39,7 +42,7 @@ char *get_flag_type(t_flags *flags)
 	return (NULL);
 }
 
-void check_flag_format(char *argument, t_flags *flags, t_packet_info *packet_info)
+void save_flag_argument(char *argument, t_flags *flags, t_packet_info *packet_info)
 {
 	if (!is_number(argument))
 		print_error_message(10, argument, 0);
@@ -104,8 +107,10 @@ void get_ip_address(t_host_info *host_info, t_packet_info *packet_info)
 }
 
 /*
- * From an argument, get its type as:
- * 'S' = One dash flag, 'D' = Two dashes flag, 'H' = Host operand
+ * Get an argument type as:
+ * 'S' = One dash flag
+ * 'D' = Two dashes flag
+ * 'H' = Host operand
  */
 char get_argument_type(char *argument)
 {
@@ -121,10 +126,7 @@ char get_argument_type(char *argument)
 }
 
 /*
- * For single dash flag, parse the argument in order to find all the flags.
- * Supported flags:
- * -v	verbose output
- * -?	help list
+ * Parses the argument for single dashed flags
  */
 void get_single_dash_flag(char *argument, t_flags *flags, bool *is_flag_argument)
 {
@@ -168,10 +170,7 @@ void get_single_dash_flag(char *argument, t_flags *flags, bool *is_flag_argument
 }
 
 /*
- * For double dash flag, parse the argument in order to the flag.
- * Supported flags:
- * --verbose	verbose output
- * --help		help list
+ * Parse the argument for double dashed flag.
  */
 void get_double_dash_flag(char *argument, t_flags *flags, bool *is_argument_flag)
 {
@@ -234,7 +233,7 @@ void ft_parser(int ac, char **av, t_host_info *host_info, t_flags *flags, t_pack
 			}
 			else
 			{
-				check_flag_format(av[i + 1], flags, packet_info);
+				save_flag_argument(av[i + 1], flags, packet_info);
 				i++;
 			}
 		}
@@ -245,6 +244,5 @@ void ft_parser(int ac, char **av, t_host_info *host_info, t_flags *flags, t_pack
 	if (host_count > 1)
 		print_error_message(4, NULL, 0);
 
-	// Check if the hostname exist, if so, get its ip
 	get_ip_address(host_info, packet_info);
 }

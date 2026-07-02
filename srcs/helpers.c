@@ -75,7 +75,9 @@ void print_error_message(int error_code, char *argument, int position)
 	}
 }
 
-/* Displays the message from the -? or --help flags */
+/*
+ * Displays the message from the -? or --help flags
+ */
 void display_help()
 {
 	printf("Usage: ./ft_ping [OPTIONS...] HOST ...\n"
@@ -99,7 +101,9 @@ void print_ping_start(t_host_info *host, bool verbose, int data_size)
 		printf("PING %s (%s): %d data bytes, id 0x%x = %d\n", host->name, host->ip, data_size, getpid(), getpid());
 }
 
-/* Prints info for each packet received */
+/*
+ * Prints info for each packet received
+ */
 void print_ping_loop(uint16_t sequence, char *host_ip, int ttl, float time, int data_size)
 {
 	if (data_size >= 8 && data_size < 24)
@@ -108,6 +112,9 @@ void print_ping_loop(uint16_t sequence, char *host_ip, int ttl, float time, int 
 		printf("%d bytes from %s: icmp_seq=%d ttl=%d time=%.3f ms\n", data_size, host_ip, sequence, ttl, time);
 }
 
+/*
+ * Prints packet's errors on verbose mode
+ */
 void print_ping_error(char *host_ip, int icmp_type)
 {
 	if (icmp_type == ICMP_TIME_EXCEEDED)
@@ -116,7 +123,9 @@ void print_ping_error(char *host_ip, int icmp_type)
 		printf("From %s: Destination host unreachable\n", host_ip);
 }
 
-/* Set up the stats to display */
+/*
+ * Sets up the stats to display
+ */
 void calculate_stats(t_ping_stat *stats)
 {
 	stats->percentage_lost = (1.0 - (float)(stats->nb_received_success) / (float)stats->nb_sent) * 100.0;
@@ -130,7 +139,6 @@ void calculate_stats(t_ping_stat *stats)
 	}
 }
 
-/* Prints the ping stats after the end of the loop */
 void print_ping_end(char *host_name, t_ping_stat stats)
 {
 	printf("--- %s ping statistics ---\n%d packets transmitted, %d packets received, %d%% packet loss\n",
