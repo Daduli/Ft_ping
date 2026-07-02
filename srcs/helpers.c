@@ -108,6 +108,14 @@ void print_ping_loop(uint16_t sequence, char *host_ip, int ttl, float time, int 
 		printf("%d bytes from %s: icmp_seq=%d ttl=%d time=%.3f ms\n", data_size, host_ip, sequence, ttl, time);
 }
 
+void print_ping_error(char *host_ip, int icmp_type)
+{
+	if (icmp_type == ICMP_TIME_EXCEEDED)
+		printf("From %s: Time to live exceeded\n", host_ip);
+	else if (icmp_type == ICMP_DEST_UNREACH)
+		printf("From %s: Destination host unreachable\n", host_ip);
+}
+
 /* Set up the stats to display */
 void calculate_stats(t_ping_stat *stats)
 {

@@ -97,6 +97,11 @@ void ft_receive_packet(int sockfd, t_packet_info *packet_info, t_ping_stat *stat
         else if (icmp_response->type == ICMP_ECHOREPLY)
             stats->nb_received_success++;
     }
+    else if (flags.verbose && (icmp_response->type == ICMP_TIME_EXCEEDED || icmp_response->type == ICMP_DEST_UNREACH))
+    {
+        print_ping_error(ip, icmp_response->type);
+        return;
+    }
     else
         return;
 

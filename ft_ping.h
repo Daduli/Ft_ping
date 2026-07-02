@@ -105,5 +105,6 @@ void print_error_message(int error_code, char *argument, int position);
 void display_help();
 void print_ping_start(t_host_info *host, bool verbose, int data_size);
 void print_ping_loop(uint16_t sequence, char *host_ip, int ttl, float time, int data_size);
+void print_ping_error(char *host_ip, int icmp_type);
 void calculate_stats(t_ping_stat *stats);
 void print_ping_end(char *host_name, t_ping_stat stats);
