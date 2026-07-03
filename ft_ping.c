@@ -26,6 +26,8 @@ int main(int ac, char **av)
 		.percentage_lost = 0,
 		.stddev = 0,
 	};
+	clock_t begin = 0;
+	double time_spent = 0.0;
 
 	// Root permission is mandatory because of raw socket
 	if (getuid())
@@ -45,11 +47,21 @@ int main(int ac, char **av)
 			// If the count flag is set, stop the loop after sending the number of packets specified
 			if (stats.nb_sent != packet_info.count)
 				alarm(packet_info.interval);
+			// If count flag is set, start a countdown after sending the last packet
+			else
+				begin = clock();
 		}
 		ft_receive_packet(sockfd, &packet_info, &stats, flags, host_info.ip);
 		// If the count flag is set, stop the loop after receiving the number of packets sent
 		if (packet_info.count > 0 && stats.nb_received == packet_info.count)
 			pinging = false;
+		// After countdown start, check constantly if 5 seconds have passed since the last packet was sent, if so, stop the loop
+		if (begin)
+		{
+			time_spent = (double)(clock() - begin) / CLOCKS_PER_SEC;
+			if (time_spent >= 5.0)
+				pinging = false;
+		}
 	}
 
 	calculate_stats(&stats);
