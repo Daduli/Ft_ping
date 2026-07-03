@@ -19,16 +19,16 @@ bool compare_flag(char *argument, char *flag)
 	return (0);
 }
 
-bool is_number(char *argument)
+int check_argument_format(char *argument)
 {
 	for (int i = 0; argument[i]; i++)
 	{
 		if (i == 0 && argument[i] == '-')
 			continue;
 		if (!isdigit(argument[i]))
-			return (0);
+			return (i);
 	}
-	return (1);
+	return (-1);
 }
 
 char *get_flag_type(t_flags *flags)
@@ -44,8 +44,9 @@ char *get_flag_type(t_flags *flags)
 
 void save_flag_argument(char *argument, t_flags *flags, t_packet_info *packet_info)
 {
-	if (!is_number(argument))
-		print_error_message(10, argument, 0);
+	int error_position = check_argument_format(argument);
+	if (error_position != -1)
+		print_error_message(10, argument, error_position);
 
 	int value = atoi(argument);
 	if (flags->time_to_live)
